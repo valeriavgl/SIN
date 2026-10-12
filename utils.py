@@ -145,6 +145,29 @@ def getEuclideanDistance(state):
                        pow((goal_pos_col - state_pos_col), 2))
     return h
 
+def secuencia(state):
+    s = 0
+    perimetro = [0, 1, 2, 5, 8, 7, 6, 3] # Mapa de la secuencia perimetral, empezando por la esquina superior izquierda y siguiendo el sentido de las agujas del reloj
+    
+    if state [4] != '0': # Si la pieza central no es esta una pienza del 1-8 
+        s += 3
+
+    for i in range(8):
+        current_piece = state[perimetro[i]]
+        if current_piece != '0': # Si la pieza actual no es el 0, comprobamos si la pieza que le sigue es la siguiente en la secuencia
+            next_piece = state[perimetro[(i + 1) % 8]]
+
+            if int(current_piece) == 8: # Si la pieza actual es el 8, la siguiente pieza en la secuencia es el 1
+                goal_next = 1
+
+            else :
+                goal_next = int(current_piece) + 1
+
+            if goal_next != int(next_piece): #  Si la pieza que le sigue no es la siguiente en la secuencia, sumamos 2 a s
+                s += 2
+    h = 3 * s
+    return h
+
 
 
 
@@ -495,3 +518,14 @@ def IDA_B(inputState,function_h):
 
     return 1    
 
+
+def descolocadas(state):
+    iteraciones = 0  
+    
+    for i in range(9):
+        if state[i] == '0': #el 0 no cuenta como descolocado, por lo que no se suma al contador de iteraciones
+            continue 
+        elif state[i] != end_state[i]: #si la pieza no está en su posición correcta, se suma 1 al contador de iteraciones
+            iteraciones += 1
+            
+    return iteraciones

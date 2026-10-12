@@ -7,7 +7,7 @@ DEFAULT_MAX_DEPTH = 30
 ##### MODIFICAR [4] #####
 ALGORITHMS        = ('BFS', 'DFS_Graph', 'DFS_Backtracking', 'PI_Backtracking', 
                      'Greedy_Manhattan', 'A_Manhattan',
-                     'A_Euclidean', 'IDA_Manhattan') 
+                     'A_Euclidean', 'IDA_Manhattan', 'Descolocadas', 'A_Secuencias') 
 ##### ------------- #####
 
 def random_state():
@@ -17,6 +17,8 @@ def random_state():
     while not utils.isSolvable(state):
         state = gen_state()
     return state
+
+
 
 
 def many_random_states(n):
@@ -31,7 +33,12 @@ def batch_run(states,
 
     
     ##### MODIFICAR [5] #####
+
+    base_stats = { "generated": 0, "expanded":0 , "max_stored": 0,"sol_cost": 0, "max_depth": 0, "time": 0}
+
     stats = {}
+    for strategy in ALGORITHMS:
+        stats [strategy] = base_stats.copy()
     ##### ------------- #####
 
     if print_info in {"all", "raw"}:
@@ -39,8 +46,9 @@ def batch_run(states,
                 .format("state", "strategy", "generated", "expanded", "max_stored", 
                         "sol_cost", "max_depth", "time(s)"))
         print("#")
-    
+    resueltos = 0
     for state in states:
+
     
         if not(utils.validateState(state)):
             sys.stderr.write(f"\n[WW] State '{state}' is not valid. Please check format. Skipping...\n\n") 
@@ -49,9 +57,11 @@ def batch_run(states,
         if not(utils.isSolvable(state)):
             sys.stderr.write(f"\n[WW] State '{state}' is not solvable. Skipping...\n\n") 
             continue
+        resueltos += 1
     
         for algorithm in algorithms:
-    
+
+
             ##### MODIFICAR [6] #####
 
             if str(algorithm) == 'BFS':
@@ -109,9 +119,30 @@ def batch_run(states,
                           utils.graphf_path, utils.graphf_cost, utils.graphf_counter, \
                           utils.graphf_depth, utils.time_graphf, utils.node_counter, \
                           utils.max_node_stored
+
+            elif str(algorithm) == 'Descolocada':   
+                utils.graphSearch(state, utils.function_1, utils.descolocadas)
+                path, sol_cost, expanded, depth, runtime, generated, max_stored, memory_rep = \
+                          utils.graphf_path, utils.graphf_cost, utils.graphf_counter, \
+                          utils.graphf_depth, utils.time_graphf, utils.node_counter, \
+                          utils.max_counter, utils.max_rev_counter 
+            
+            elif str(algorithm) == 'A_Secuencias':   
+                utils.graphSearch(state, utils.function_1, utils.secuencia)
+                path, sol_cost, expanded, depth, runtime, generated, max_stored, memory_rep = \
+                          utils.graphf_path, utils.graphf_cost, utils.graphf_counter, \
+                          utils.graphf_depth, utils.time_graphf, utils.node_counter, \
+                          utils.max_counter, utils.max_rev_counter 
     
     
             depth = int(depth) 
+            stats[algorithm]["generated"] += generated
+            stats[algorithm]["expanded"] += expanded
+            stats[algorithm]["max_stored"] += max_stored
+            stats[algorithm]["sol_cost"] += sol_cost
+            stats[algorithm]["max_depth"] += max_depth
+            stats[algorithm]["time"] += runtime
+    
     
             if print_info in {"all", "raw"}:
                 print(f"""{state:10s} {algorithm:20s} {generated:10d} {expanded:10d} {max_stored:10d} {sol_cost:10d} {depth:10d} {runtime:12.6f}""")
@@ -121,7 +152,9 @@ def batch_run(states,
 
     if print_info in {"all", "stats"}:
         ##### MODIFICAR [7] #####
-        pass
+        for algorithm, metrics in stats.items():
+            for metric, value in metrics.items():
+                print (f"""{algorithm:20s} {metric:15s} {value/resueltos:.6f}""")
         ##### ------------- #####
 
 if __name__ == "__main__":
